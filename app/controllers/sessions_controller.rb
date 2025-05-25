@@ -7,9 +7,17 @@ class SessionsController < ApplicationController
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
-      redirect_to after_authentication_url
+      Rails.logger.info "User authenticated: #{user.email_address}"
+      session = start_new_session_for(user)
+      if session.persisted?
+        Rails.logger.info "Session created: #{session.id}, cookie set: #{cookies.signed[:session_id].present?}"
+        redirect_to after_authentication_url
+      else
+        Rails.logger.error "Failed to create session: #{session.errors.full_messages}"
+        redirect_to new_session_path, alert: "Failed to create session. Please try again."
+      end
     else
+      Rails.logger.warn "Failed login attempt for email: #{params[:email_address]}"
       redirect_to new_session_path, alert: "Try another email address or password."
     end
   end
