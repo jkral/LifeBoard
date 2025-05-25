@@ -1,0 +1,72 @@
+=== Testing Score Calculations ===
+
+1. Initial State:
+   - All categories and subcategories should have a score of 10.0
+
+2. Test Plan:
+   - Display all categories and their subcategories with current scores
+   - Update subcategory scores for the first category
+   - Verify the category score updates correctly
+   - Update all categories with random scores
+   - Calculate and display the total score
+
+3. Current Data:
+   - Number of categories: 3
+   - Subcategories per category: 3
+   - Default score: 10.0
+
+4. Expected Behavior:
+   - Category score should be the average of its subcategory scores
+   - Total score should be the average of all category scores
+   - All scores should be between 1.0 and 10.0 with one decimal place
+
+Run the following command in your terminal to test:
+
+```
+rails runner "
+  puts '=== Current Categories and Subcategories ===';
+  Category.all.includes(:subcategories).each do |category|
+    puts '\n' + category.name + ' (' + category.score.to_s + ')';
+    category.subcategories.each { |sc| puts '  - ' + sc.name + ': ' + sc.score.to_s };
+  end;
+
+  puts '\n=== Updating Health Subcategory Scores ===';
+  health = Category.find_by(name: 'Health');
+  health.subcategories[0].update(score: 8.5);
+  health.subcategories[1].update(score: 7.0);
+  health.subcategories[2].update(score: 9.0);
+  health.reload;
+  
+  puts 'New scores for Health:';
+  health.subcategories.each { |sc| puts '  - ' + sc.name + ': ' + sc.score.to_s };
+  puts 'New Health category score: ' + health.score.to_s + ' (should be 8.2)';
+
+  puts '\n=== Updating All Categories with Random Scores ===';
+  Category.all.each do |cat|
+    puts '\n' + cat.name + ':';
+    cat.subcategories.each do |sc| 
+      new_score = (5.0 + rand * 5.0).round(1);
+      sc.update(score: new_score);
+      puts '  - ' + sc.name + ': ' + new_score.to_s;
+    end;
+    cat.reload;
+    puts '  Category score: ' + cat.score.to_s;
+  end;
+
+  total = (Category.average(:score) || 0).round(1);
+  puts '\n=== Final Total Score ===';
+  puts 'Average of all category scores: ' + total.to_s;
+"
+```
+
+5. Expected Output:
+   - Initial state with all scores at 10.0
+   - Updated Health category with specific scores (8.5, 7.0, 9.0)
+   - Health category score should be 8.2
+   - Random scores for all categories
+   - Final total score as average of all categories
+
+6. Verification:
+   - Check that all calculations are correct
+   - Ensure scores are properly rounded to one decimal place
+   - Verify that all scores are within the valid range (1.0-10.0)
