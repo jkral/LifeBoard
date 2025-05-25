@@ -2,3 +2,23 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import 'flowbite'
+import 'flowbite-datepicker'
+
+// Initialize Alpine.js
+document.addEventListener('DOMContentLoaded', () => {
+  // Auto-hide flash messages after 5 seconds
+  const flashMessages = document.querySelectorAll('[data-controller="flash"]');
+  flashMessages.forEach(flash => {
+    setTimeout(() => {
+      flash.remove();
+    }, 5000);
+  });
+});
+
+// Make Alpine.js work with Turbo
+document.addEventListener('turbo:load', () => {
+  // Re-initialize Flowbite components after Turbo navigation
+  if (window.Flowbite) {
+    window.Flowbite.init();
+  }
+});
