@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full bg-gray-100">
   <head>
-    <title><%= content_for(:title) || "Life Board" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for(:title) || "LifeBoard" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
@@ -17,14 +21,55 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <%= csrf_meta_tags %>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    </style>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+  <body class="h-full font-sans antialiased bg-gradient-to-br from-indigo-600 to-purple-600">
+    <div class="relative min-h-screen max-w-md mx-auto overflow-hidden shadow-2xl bg-white bg-opacity-10 backdrop-blur-lg">
+      <!-- Status bar -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-white bg-opacity-20"></div>
+      
+      <!-- Main content -->
+      <main class="relative z-10 min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <% if current_user %>
+          <nav class="px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">LifeBoard</h1>
+            <div class="flex items-center space-x-4">
+              <%= button_to logout_path, method: :delete, class: "text-white text-sm font-medium hover:underline" do %>
+                Sign out
+              <% end %>
+            </div>
+          </nav>
+        <% else %>
+          <nav class="px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">LifeBoard</h1>
+            <div class="flex items-center space-x-4">
+              <%= link_to "Log in", login_path, class: "text-white text-sm font-medium hover:underline" %>
+              <%= link_to "Sign up", signup_path, class: "bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-opacity-90 transition duration-200" %>
+            </div>
+          </nav>
+        <% end %>
+        
+        <!-- Page content -->
+        <div class="flex-1">
+          <%= yield %>
+        </div>
+        
+        <!-- Flash messages -->
+        <% flash.each do |type, message| %>
+          <div class="<%= type == 'alert' ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-500' %> p-4 text-center text-sm font-medium">
+            <%= message %>
+          </div>
+        <% end %>
+      </main>
+    </div>
   </body>
 </html>

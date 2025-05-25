@@ -1,8 +1,9 @@
 class Subcategory < ApplicationRecord
-  belongs_to :category
+  belongs_to :category, touch: true
   
-  # Set default value for active
+  # Set default values
   attribute :active, :boolean, default: true
+  attribute :score, :decimal, default: 10.0
   
   validates :name, presence: true
   validates :position, presence: true, numericality: { only_integer: true }
@@ -21,6 +22,7 @@ class Subcategory < ApplicationRecord
   private
   
   def update_category_score
-    category.update_score
+    # This will trigger the after_touch callback on the category
+    category.touch
   end
 end

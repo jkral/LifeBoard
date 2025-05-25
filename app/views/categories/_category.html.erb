@@ -1,0 +1,9 @@
+<div id="<%= dom_id category %>" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-6">
+  <h2 class="text-center text-white text-opacity-90 text-sm font-medium mb-3">Current Score</h2>
+  <div class="text-5xl font-bold text-center text-white mb-4"><%= category.score %></div>
+  
+  <!-- Subcategory Scores -->
+  <div id="subcategories_list" class="space-y-4">
+    <%= render partial: 'categories/subcategories', locals: { subcategories: category.subcategories.active.order(:position) } %>
+  </div>
+</div>

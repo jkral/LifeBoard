@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "category_#{@category.id}" do %>
+  <%= render partial: 'categories/category', locals: { category: @category } %>
+<% end %>
+
+<%= turbo_stream.update "subcategories_list" do %>
+  <%= render partial: 'categories/subcategories', locals: { subcategories: @subcategories } %>
+<% end %>
