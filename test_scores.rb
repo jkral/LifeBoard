@@ -1,7 +1,7 @@
 # test_scores.rb
 require_relative 'config/environment'
 
-def display_scores
+def display_scores(show_inactive: false)
   puts "\n=== CURRENT SCORES ==="
   
   # Show total score (average of all categories)
@@ -12,7 +12,24 @@ def display_scores
   Category.all.includes(:subcategories).order(:position).each do |category|
     puts "\n#{category.name} (#{category.score.round(1)}/10.0)"
     category.subcategories.order(:position).each do |sub|
-      puts "  - #{sub.name}: #{sub.score.round(1)}/10.0"
+      status = sub.active ? '' : ' [INACTIVE]'
+      puts "  - #{sub.name}: #{sub.score.round(1)}/10.0#{status}"
+    end
+  end
+  
+  if show_inactive
+    puts "\nActive subcategories only:"
+    Category.all.includes(:subcategories).order(:position).each do |category|
+      active_subs = category.active_subcategories
+      next if active_subs.empty?
+      
+      puts "\n#{category.name} (from #{active_subs.count} active subcategories):"
+      active_subs.each do |sub|
+        puts "  - #{sub.name}: #{sub.score.round(1)}/10.0"
+      end
+      
+      calculated_avg = (active_subs.sum(:score) / active_subs.count.to_f).round(1)
+      puts "  Calculated average: #{calculated_avg} (should match category score: #{category.score.round(1)})"
     end
   end
 end
@@ -45,17 +62,37 @@ pro_subs = Category.find_by(name: 'Professional').subcategories.order(:position)
   pro_subs[i].update(score: score)
 end
 
+# Show state after initial updates
+puts "\n\n=== AFTER INITIAL UPDATES ==="
+display_scores(show_inactive: true)
+
+# Test deactivating a subcategory
+puts "\n\n=== TESTING INACTIVE SUBCATEGORIES ==="
+
+# Deactivate the Spiritual subcategory
+spiritual = Category.find_by(name: 'Health').subcategories.find_by(name: 'Spiritual')
+puts "Deactivating #{spiritual.name} subcategory"
+spiritual.update(active: false)
+
+# Show how this affects the Health category
+health = Category.find_by(name: 'Health')
+health.reload
+active_names = health.active_subcategories.map(&:name).join(', ')
+puts "\nAfter deactivating #{spiritual.name}:"
+puts "- Active subcategories: #{active_names}"
+puts "- Health score is now: #{health.score} (average of active subcategories only)"
+
+# Show final state with inactive indicators
+puts "\n=== FINAL STATE (SHOWING INACTIVE) ==="
+display_scores(show_inactive: true)
+
+# Reactivate and test
+puts "\n\n=== TESTING REACTIVATION ==="
+spiritual.update(active: true)
+health.reload
+puts "Reactivated #{spiritual.name} subcategory"
+puts "- Health score is now: #{health.score} (back to average of all subcategories)"
+
 # Show final state
-puts "\n\n=== FINAL STATE ==="
-display_scores
-
-# Show how changing one subcategory affects the category and total
-puts "\n\n=== DEMO: UPDATING A SINGLE SUBCATEGORY ==="
-partner = Category.find_by(name: 'Personal').subcategories.find_by(name: 'Partner')
-puts "Current Partner score: #{partner.score}"
-puts "Updating Partner score from #{partner.score} to 5.0"
-partner.update(score: 5.0)
-
-# Show updated state
-puts "\n=== UPDATED STATE ==="
-display_scores
+puts "\n=== FINAL STATE (ALL ACTIVE) ==="
+display_scores(show_inactive: true)
