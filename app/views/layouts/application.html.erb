@@ -21,7 +21,7 @@
       }
       
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -61,20 +61,29 @@
       input[type=range]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
         background: white;
         border-radius: 50%;
         cursor: pointer;
       }
       
       input[type=range]::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
         background: white;
         border-radius: 50%;
         cursor: pointer;
         border: none;
+      }
+      
+      input[type=range] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 3px;
+        outline: none;
       }
     </style>
   </head>

@@ -1,37 +1,120 @@
 <div class="max-w-md mx-auto">
   <!-- App header -->
-  <header class="text-center mb-8">
-    <h1 class="text-2xl font-bold text-white">LifeBoard</h1>
-    <p class="text-white/80 text-sm">Life Balance Dashboard</p>
-  </header>
+  <div class="header">
+    <div class="app-title">LifeBoard</div>
+    <div class="subtitle">Life Balance Dashboard</div>
+  </div>
   
   <!-- Total score card -->
-  <div class="bg-white/15 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20 shadow-md">
-    <div class="text-5xl font-bold text-white text-center">
+  <div class="total-score">
+    <h2>Total Score</h2>
+    <div class="total-value">
       <%= number_with_precision(@total_score, precision: 1) %>
     </div>
   </div>
   
   <!-- Categories list -->
-  <div class="space-y-4 mb-6">
+  <div class="categories">
     <% @categories.each do |category| %>
       <% score = category.score || 0 %>
       
       <%= link_to category_path(category), class: "block" do %>
-        <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-white font-semibold"><%= category.name %></h3>
-              <p class="text-white/70 text-sm"><%= category.description %></p>
-            </div>
-            <div class="text-2xl font-bold text-white">
-              <%= number_with_precision(score, precision: 1) %>
-            </div>
+        <div class="category-card">
+          <div class="category-info">
+            <h3><%= category.name %></h3>
+            <p><%= category.description %></p>
+          </div>
+          <div class="category-score">
+            <%= number_with_precision(score, precision: 1) %>
           </div>
         </div>
       <% end %>
     <% end %>
-    
-    <!-- We've removed the 'Add Category' button since the route doesn't exist -->
   </div>
 </div>
+
+<style>
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+  }
+  
+  .app-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  
+  .total-score {
+    text-align: center;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .total-score h2 {
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    opacity: 0.9;
+  }
+  
+  .total-value {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  
+  .categories {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .category-card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .category-card:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+  }
+  
+  .category-info h3 {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .category-info p {
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+  }
+  
+  .category-score {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+  }
+</style>

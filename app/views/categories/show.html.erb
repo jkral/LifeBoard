@@ -1,105 +1,239 @@
 <div class="max-w-md mx-auto">
   <!-- Category Header -->
-  <div class="mb-6">
-    <div class="flex items-center justify-between mb-6">
-      <%= link_to root_path, class: "p-2 rounded-full bg-white/15 hover:bg-white/25 transition-colors" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      <% end %>
-      <h1 class="text-2xl font-bold text-white"><%= @category.name %></h1>
-      <div class="w-9"></div> <!-- Spacer for flex alignment -->
-    </div>
+  <div class="category-header">
+    <%= link_to root_path, class: "back-btn" do %>
+      ← Back
+    <% end %>
+    <div class="category-title"><%= @category.name %></div>
+    <div></div> <!-- Spacer for flex alignment -->
+  </div>
+  
+  <!-- Category Score -->
+  <div class="score-editor">
+    <h3>Current <%= @category.name %> Score</h3>
+    <div class="score-display"><%= number_with_precision(@category.score, precision: 1) %></div>
     
-    <!-- Category Score -->
-    <div class="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20 mb-6">
-      <h2 class="text-center text-white text-sm font-medium mb-3">Current Score</h2>
-      <div class="text-5xl font-bold text-center text-white mb-4"><%= number_with_precision(@category.score, precision: 1) %></div>
+    <!-- Subcategory Scores -->
+    <div class="subcategories">
+      <% @subcategories.each do |subcategory| %>
+        <div class="subcategory-item">
+          <div class="subcategory-header">
+            <h4><%= subcategory.name %></h4>
+            <span><%= number_with_precision(subcategory.score, precision: 1) %></span>
+          </div>
+          <input 
+            type="range" 
+            class="score-slider"
+            min="1" 
+            max="10" 
+            step="0.1" 
+            value="<%= subcategory.score %>" 
+            data-controller="score-slider"
+            data-action="input->score-slider#updateScore"
+            data-score-slider-subcategory-id-value="<%= subcategory.id %>"
+          >
+        </div>
+      <% end %>
       
-      <!-- Subcategory Scores -->
-      <div class="space-y-4">
-        <% @subcategories.each do |subcategory| %>
-          <div class="bg-white/10 rounded-xl p-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="text-white font-medium"><%= subcategory.name %></h3>
-              <span class="text-xl font-bold text-white"><%= number_with_precision(subcategory.score, precision: 1) %></span>
-            </div>
-            <input 
-              type="range" 
-              min="1" 
-              max="10" 
-              step="0.1" 
-              value="<%= subcategory.score %>" 
-              class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
-              data-controller="score-slider"
-              data-action="input->score-slider#updateScore"
-              data-score-slider-subcategory-id-value="<%= subcategory.id %>"
-            >
-          </div>
-        <% end %>
-        
-        <!-- Empty state message -->
-        <% if @subcategories.empty? %>
-          <div class="text-center text-white/70 py-3">
-            <p class="mb-2">No subcategories yet</p>
-          </div>
-        <% end %>
-        
-        <!-- We've removed the 'Add Subcategory' button since the route doesn't exist -->
-      </div>
+      <!-- Empty state message -->
+      <% if @subcategories.empty? %>
+        <div class="empty-state">
+          <p>No subcategories yet</p>
+        </div>
+      <% end %>
     </div>
   </div>
   
   <!-- Goals Board -->
-  <div class="mb-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-white">Goals</h2>
-      <button class="bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Add Goal
-      </button>
-    </div>
+  <div class="goals-section">
+    <h3>
+      Goals
+      <button class="add-goal-btn">+ Add Goal</button>
+    </h3>
     
-    <div class="overflow-x-auto pb-4">
-      <div class="flex space-x-4 min-w-max">
-        <!-- To Do Column -->
-        <div class="w-64 bg-white/10 rounded-xl p-4 border border-white/20">
-          <h3 class="text-white font-medium mb-4">To Do</h3>
-          <div class="space-y-3">
-            <!-- Sample Goal Card -->
-            <div class="bg-white/10 rounded-lg p-3 border border-white/10">
-              <h4 class="text-white font-medium text-sm">Morning Workout</h4>
-              <p class="text-white/70 text-xs mt-1">30min exercise routine</p>
-            </div>
-          </div>
+    <div class="goals-board">
+      <!-- To Do Column -->
+      <div class="goal-column">
+        <div class="column-title">To Do</div>
+        <div class="goal-card">
+          <div class="goal-title">Morning Workout</div>
+          <div class="goal-desc">30min exercise routine</div>
         </div>
-        
-        <!-- In Progress Column -->
-        <div class="w-64 bg-white/10 rounded-xl p-4 border border-white/20">
-          <h3 class="text-white font-medium mb-4">In Progress</h3>
-          <div class="space-y-3">
-            <!-- Sample Goal Card -->
-            <div class="bg-white/10 rounded-lg p-3 border border-white/10">
-              <h4 class="text-white font-medium text-sm">Sleep Schedule</h4>
-              <p class="text-white/70 text-xs mt-1">8 hours consistent sleep</p>
-            </div>
-          </div>
+        <div class="goal-card">
+          <div class="goal-title">Meal Prep</div>
+          <div class="goal-desc">Prepare healthy meals</div>
         </div>
-        
-        <!-- Done Column -->
-        <div class="w-64 bg-white/10 rounded-xl p-4 border border-white/20">
-          <h3 class="text-white font-medium mb-4">Done</h3>
-          <div class="space-y-3">
-            <!-- Sample Goal Card -->
-            <div class="bg-white/10 rounded-lg p-3 border border-white/10">
-              <h4 class="text-white font-medium text-sm">Water Intake</h4>
-              <p class="text-white/70 text-xs mt-1">Drink 8 glasses daily</p>
-            </div>
-          </div>
+      </div>
+      
+      <!-- In Progress Column -->
+      <div class="goal-column">
+        <div class="column-title">In Progress</div>
+        <div class="goal-card">
+          <div class="goal-title">Sleep Schedule</div>
+          <div class="goal-desc">8 hours consistent sleep</div>
+        </div>
+      </div>
+      
+      <!-- Done Column -->
+      <div class="goal-column">
+        <div class="column-title">Done</div>
+        <div class="goal-card">
+          <div class="goal-title">Water Intake</div>
+          <div class="goal-desc">Drink 8 glasses daily</div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  /* Category Page Styles */
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  .back-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .category-title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .score-editor {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .score-editor h3 {
+    color: white;
+    font-size: 14px;
+    margin-bottom: 15px;
+    opacity: 0.9;
+  }
+  
+  .score-display {
+    font-size: 42px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 15px;
+  }
+  
+  .subcategories {
+    margin-top: 20px;
+  }
+  
+  .subcategory-item {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+  }
+  
+  .subcategory-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .subcategory-header h4 {
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  
+  .subcategory-header span {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    padding: 15px 0;
+  }
+  
+  .goals-section h3 {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .add-goal-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  
+  .goals-board {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .goal-column {
+    min-width: 160px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  
+  .column-title {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  
+  .goal-card {
+    background: rgba(255,255,255,0.9);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .goal-card:active {
+    cursor: grabbing;
+  }
+  
+  .goal-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1f2937;
+  }
+  
+  .goal-desc {
+    font-size: 11px;
+    color: #6b7280;
+    line-height: 1.3;
+  }
+</style>
