@@ -12,16 +12,20 @@ class Category < ApplicationRecord
     active_subs = subcategories.active
     return 0 if active_subs.empty?
     
-    total = active_subs.sum(:score)
-    count = active_subs.count
+    # Convert all scores to float to ensure consistent behavior
+    scores = active_subs.pluck(:score).map(&:to_f)
+    total = scores.sum
+    count = scores.size
     
-    # Special case: if all subcategories are 10.0, ensure the result is exactly 10.0
-    if active_subs.all? { |sub| sub.score.to_f >= 9.95 }
+    # Special case: if all subcategories are 10.0 (or very close to it), return exactly 10.0
+    if scores.all? { |score| score >= 9.95 }
       return 10.0
     end
     
-    # Calculate with higher precision to avoid rounding errors
-    (total.to_f / count).round(1)
+    # Calculate average with proper rounding
+    average = total / count
+    # Round to 1 decimal place and ensure we don't get values like 9.9999999
+    (average * 10).round.to_f / 10
   end
   
   # Update the score based on active subcategories

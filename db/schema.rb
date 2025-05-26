@@ -10,49 +10,52 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_26_014838) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_26_185746) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "categories", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "description"
-    t.decimal "score", precision: 3, scale: 1, default: "10.0"
-    t.integer "position", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_categories_on_name", unique: true
-    t.index ["position"], name: "index_categories_on_position", unique: true
+    t.text "name"
+    t.text "description"
+    t.decimal "score", precision: 5, scale: 2, default: "10.0"
+    t.bigint "position"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["name"], name: "idx_16548_index_categories_on_name", unique: true
+    t.index ["position"], name: "idx_16548_index_categories_on_position", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.string "ip_address"
-    t.string "user_agent"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
+    t.bigint "user_id"
+    t.text "ip_address"
+    t.text "user_agent"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["user_id"], name: "idx_16541_index_sessions_on_user_id"
   end
 
   create_table "subcategories", force: :cascade do |t|
-    t.integer "category_id", null: false
-    t.string "name", null: false
-    t.string "description"
-    t.decimal "score", precision: 3, scale: 1, default: "10.0"
-    t.integer "position", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "active", default: true, null: false
-    t.index ["category_id", "name"], name: "index_subcategories_on_category_id_and_name", unique: true
-    t.index ["category_id", "position"], name: "index_subcategories_on_category_id_and_position", unique: true
-    t.index ["category_id"], name: "index_subcategories_on_category_id"
+    t.bigint "category_id"
+    t.text "name"
+    t.text "description"
+    t.decimal "score", precision: 5, scale: 2, default: "10.0"
+    t.bigint "position"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.boolean "active", default: true
+    t.index ["category_id", "name"], name: "idx_16556_index_subcategories_on_category_id_and_name", unique: true
+    t.index ["category_id", "position"], name: "idx_16556_index_subcategories_on_category_id_and_position", unique: true
+    t.index ["category_id"], name: "idx_16556_index_subcategories_on_category_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "email_address", null: false
-    t.string "password_digest", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.text "email_address"
+    t.text "password_digest"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["email_address"], name: "idx_16534_index_users_on_email_address", unique: true
   end
 
-  add_foreign_key "sessions", "users"
-  add_foreign_key "subcategories", "categories"
+  add_foreign_key "sessions", "users", name: "sessions_user_id_fkey"
+  add_foreign_key "subcategories", "categories", name: "subcategories_category_id_fkey"
 end

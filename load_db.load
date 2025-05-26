@@ -1,0 +1,7 @@
+LOAD DATABASE
+  FROM 'db/development.sqlite3'
+  INTO postgresql://postgres:postgres@localhost:5432/lifeboard_development
+
+WITH include drop, create tables, create indexes, reset sequences, foreign keys
+
+SET maintenance_work_mem to '128MB', work_mem to '12MB', search_path to 'public';

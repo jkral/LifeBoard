@@ -26,8 +26,12 @@ export default class extends Controller {
       const scoreDisplay = parentItem.querySelector('.subcategory-header span')
       console.log('Score display found:', !!scoreDisplay)
       if (scoreDisplay) {
-        scoreDisplay.textContent = parseFloat(score).toFixed(1)
-        console.log('Updated display text to:', parseFloat(score).toFixed(1))
+        // Ensure we're working with a number and format to 1 decimal place
+        const formattedScore = parseFloat(score).toFixed(1)
+        scoreDisplay.textContent = formattedScore
+        // Also update the input value to ensure consistency
+        event.target.value = parseFloat(score).toFixed(1)
+        console.log('Updated display text to:', formattedScore)
       }
     }
     
@@ -59,7 +63,7 @@ export default class extends Controller {
         },
         body: JSON.stringify({ 
           subcategory: { 
-            score: parseFloat(score) 
+            score: parseFloat(score).toFixed(1) // Ensure consistent decimal places
           } 
         })
       })

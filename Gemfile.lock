@@ -190,6 +190,7 @@ GEM
     parser (3.3.8.0)
       ast (~> 2.4.1)
       racc
+    pg (1.5.9)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -289,14 +290,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
-    sqlite3 (2.6.0-aarch64-linux-gnu)
-    sqlite3 (2.6.0-aarch64-linux-musl)
-    sqlite3 (2.6.0-arm-linux-gnu)
-    sqlite3 (2.6.0-arm-linux-musl)
-    sqlite3 (2.6.0-arm64-darwin)
-    sqlite3 (2.6.0-x86_64-darwin)
-    sqlite3 (2.6.0-x86_64-linux-gnu)
-    sqlite3 (2.6.0-x86_64-linux-musl)
     sshkit (1.24.0)
       base64
       logger
@@ -370,12 +363,12 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  pg (~> 1.5)
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.2)
   rubocop-rails-omakase
   selenium-webdriver
-  sqlite3 (~> 2.0)
   stimulus-rails
   tailwindcss-rails
   thruster

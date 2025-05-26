@@ -1,30 +1,24 @@
-# SQLite. Versions 3.8.0 and up are supported.
-#   gem install sqlite3
-#
-#   Ensure the SQLite 3 gem is defined in your Gemfile
-#   gem "sqlite3"
-#
-#   And be sure to use new-style password hashing:
-#   https://guides.rubyonrails.org/active_model_secure_password.html#password-hashing
+# PostgreSQL configuration
+# Install PostgreSQL if needed: https://www.postgresql.org/download/
 
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
+  username: postgres
+  password: postgres
+  host: localhost
 
 development:
   <<: *default
-  database: db/development.sqlite3
+  database: lifeboard_development
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: db/test.sqlite3
+  database: lifeboard_test
 
-# Warning: Make sure your production database path is on a persistent
-# volume, otherwise your application data could be deleted between deploys.
 production:
   <<: *default
-  database: db/production.sqlite3
+  database: lifeboard_production
+  username: lifeboard
+  password: <%= ENV['LIFEBOARD_DATABASE_PASSWORD'] %>
