@@ -10,8 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     
     <style>
@@ -26,6 +25,13 @@
         -moz-osx-font-smoothing: grayscale;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+      }
+
+      .page-container {
+        max-width: 28rem;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
       }
       
       /* Custom scrollbar for WebKit browsers */

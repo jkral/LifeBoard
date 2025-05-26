@@ -16,6 +16,12 @@
     @apply border border-white text-white hover:bg-white/10;
   }
   
+  .app-title {
+    @apply text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  
   .card {
     @apply bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6;
   }

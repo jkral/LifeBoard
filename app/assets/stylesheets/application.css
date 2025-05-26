@@ -7,14 +7,18 @@
  * You're free to add application-wide styles to this file and they'll appear at the bottom of the
  * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
  * files in this directory.
- *
- *= require_tree .
- *= require_self
  */
 
+/* Tailwind directives */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+/* Custom styles */
+@import "custom";
+
+/* Application styles */
+@import "application.tailwind";
 
 /* Custom animations */
 @keyframes fadeInDown {

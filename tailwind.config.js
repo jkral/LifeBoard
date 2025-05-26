@@ -9,7 +9,16 @@ module.exports = {
     './app/helpers/**/*.rb',
     './app/assets/stylesheets/**/*.css',
     './app/javascript/**/*.js',
-    './node_modules/flowbite/**/*.js'
+    './node_modules/flowbite/**/*.js',
+    './app/views/**/*.html.erb',
+    './app/views/**/*.html+*erb',
+    './app/views/**/*.html.erb',
+    './app/helpers/**/*.rb',
+    './app/javascript/**/*.js',
+    './app/javascript/**/*.jsx',
+    './app/javascript/**/*.ts',
+    './app/javascript/**/*.tsx',
+    './app/javascript/**/*.vue'
   ],
   theme: {
     extend: {

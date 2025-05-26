@@ -1,11 +1,13 @@
-<div class="max-w-md mx-auto">
+<div class="page-container">
   <!-- Category Header -->
-  <div class="category-header">
-    <%= link_to root_path, class: "back-btn" do %>
-      ← Back
-    <% end %>
-    <div class="category-title"><%= @category.name %></div>
-    <div></div> <!-- Spacer for flex alignment -->
+  <div class="mb-4">
+    <div class="category-header items-center">
+      <%= link_to root_path, class: "back-btn mt-1" do %>
+        ← Back
+      <% end %>
+      <div></div> <!-- Spacer for flex alignment -->
+    </div>
+    <h1 class="app-title text-center mt-4" style="font-size: 3rem; font-weight: bold; line-height: 1.2; color: white;"><%= @category.name %></h1>
   </div>
   
   <!-- Category Score -->
@@ -120,6 +122,8 @@
   }
   
   .back-btn {
+    position: relative;
+    top: 4.5rem; /* Positioned even lower */
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
@@ -127,6 +131,7 @@
     border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
+    margin-bottom: 1rem;
   }
   
   .category-title {
@@ -134,7 +139,13 @@
     font-weight: bold;
   }
   
+  .page-container {
+    padding-top: 0;
+    margin-top: -4.25rem; /* Pull content up a bit more */
+  }
+  
   .score-editor {
+    margin-top: 1rem;  /* Reduced space above the scores */
     background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
     border-radius: 16px;
