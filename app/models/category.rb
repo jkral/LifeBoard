@@ -1,6 +1,7 @@
 class Category < ApplicationRecord
   belongs_to :user
   has_many :subcategories, -> { order(position: :asc) }, dependent: :destroy
+  has_many :goals, -> { order(position: :asc) }, dependent: :destroy
   
   # Set default score
   attribute :score, :decimal, default: 10.0

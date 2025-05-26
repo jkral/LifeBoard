@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_26_204443) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_26_210758) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_204443) do
     t.index ["user_id", "name"], name: "index_categories_on_user_id_and_name", unique: true
     t.index ["user_id", "position"], name: "index_categories_on_user_id_and_position", unique: true
     t.index ["user_id"], name: "index_categories_on_user_id"
+  end
+
+  create_table "goals", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "todo", null: false
+    t.integer "position", null: false
+    t.bigint "category_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id", "status", "position"], name: "index_goals_on_category_id_and_status_and_position"
+    t.index ["category_id"], name: "index_goals_on_category_id"
+    t.index ["user_id", "category_id", "status", "position"], name: "index_goals_on_user_id_and_category_id_and_status_and_position"
+    t.index ["user_id"], name: "index_goals_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -63,6 +78,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_204443) do
   end
 
   add_foreign_key "categories", "users"
+  add_foreign_key "goals", "categories"
+  add_foreign_key "goals", "users"
   add_foreign_key "sessions", "users", name: "sessions_user_id_fkey"
   add_foreign_key "subcategories", "categories", name: "subcategories_category_id_fkey"
   add_foreign_key "subcategories", "users"

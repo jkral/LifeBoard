@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   # Categories
   resources :categories, only: [:show, :update] do
     resources :subcategories, only: [:show, :update]
+    resources :goals, only: [:index, :create, :update, :destroy] do
+      post 'move', on: :member
+    end
     post 'force_score', on: :member
   end
   

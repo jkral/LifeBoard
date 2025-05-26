@@ -3,6 +3,8 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import 'flowbite'
 import 'flowbite-datepicker'
+console.log('Importing goals board controller')
+import "./controllers/goals_board_controller"
 
 // Initialize Alpine.js
 document.addEventListener('DOMContentLoaded', () => {

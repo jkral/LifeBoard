@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :categories, dependent: :destroy
   has_many :subcategories, dependent: :destroy
+  has_many :goals, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 end
