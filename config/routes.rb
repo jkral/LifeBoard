@@ -8,8 +8,9 @@ Rails.application.routes.draw do
   root to: 'dashboard#index'
   
   # Categories
-  resources :categories, only: [:show] do
+  resources :categories, only: [:show, :update] do
     resources :subcategories, only: [:show, :update]
+    post 'force_score', on: :member
   end
   
   # Authentication

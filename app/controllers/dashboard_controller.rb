@@ -2,6 +2,11 @@ class DashboardController < ApplicationController
   before_action :require_authentication
   
   def index
+    if current_user.nil?
+      redirect_to login_path, alert: "Please log in to continue."
+      return
+    end
+    
     @categories = Category.includes(:subcategories).order(:position)
     @total_score = calculate_total_score
   end

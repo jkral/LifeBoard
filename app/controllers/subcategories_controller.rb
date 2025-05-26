@@ -6,26 +6,38 @@ class SubcategoriesController < ApplicationController
   end
 
   def update
-    if @subcategory.update(subcategory_params)
-      # The category's after_touch callback will handle the score update
-      @category = @subcategory.category
-      @subcategories = @category.subcategories.active.order(:position)
-      
+    @category = @subcategory.category
+    
+    # Use a transaction to ensure both updates succeed or fail together
+    ActiveRecord::Base.transaction do
+      if @subcategory.update(subcategory_params)
+        # Force update the category score in the same transaction
+        @category.update_score
+        
+        respond_to do |format|
+          format.turbo_stream
+          format.html { redirect_to category_path(@category), notice: 'Score updated successfully' }
+          format.json { 
+            render json: { 
+              success: true, 
+              subcategory_score: @subcategory.score.to_f,
+              category_score: @category.reload.score.to_f  # Reload to get the latest value
+            } 
+          }
+        end
+      else
+        raise ActiveRecord::Rollback
+      end
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::Rollback
       respond_to do |format|
         format.turbo_stream
-        format.html { redirect_to category_path(@category), notice: 'Score updated successfully' }
-        format.json { render json: { 
-          success: true, 
-          subcategory_score: @subcategory.score, 
-          category_score: @category.score,
-          message: 'Score updated successfully' 
-        }}
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream { render :error }
-        format.html { redirect_to category_path(@subcategory.category), alert: 'Failed to update score' }
-        format.json { render json: { success: false, message: 'Failed to update score' }, status: :unprocessable_entity }
+        format.html { redirect_to category_path(@category), alert: 'Failed to update score' }
+        format.json { 
+          render json: { 
+            success: false, 
+            errors: @subcategory.errors.full_messages 
+          }, status: :unprocessable_entity 
+        }
       end
     end
   end
