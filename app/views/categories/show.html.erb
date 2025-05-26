@@ -73,7 +73,10 @@
   </div>
   
   <!-- Goals Board -->
-  <div class="goals-section" data-controller="goals-board" data-goals-board-category-id-value="<%= @category.id %>">
+  <div class="goals-section" 
+       data-controller="goals-board" 
+       data-goals-board-category-id-value="<%= @category.id %>"
+       data-action="turbo:before-cache@document->goals-board#cleanup turbo:before-render@document->goals-board#cleanup">
     <div class="goals-header">
       <h2>Goals</h2>
       <button id="add-goal-btn" class="add-goal-btn">+ Add Goal</button>
@@ -114,8 +117,20 @@
 </div>
 
 <script>
-  // Global variables
-  let draggedItem = null
+  // This will be managed by the Stimulus controller
+  document.addEventListener('turbo:load', function() {
+    // This ensures compatibility with both full page loads and Turbo visits
+    if (window.goalsBoardController) {
+      window.goalsBoardController.initialize();
+    }
+  });
+  
+  // Clean up on Turbo cache
+  document.addEventListener('turbo:before-cache', function() {
+    if (window.goalsBoardController) {
+      window.goalsBoardController.cleanup();
+    }
+  });
   
   // Function to escape HTML to prevent XSS
   function escapeHtml(unsafe) {
@@ -574,14 +589,27 @@
     }
   }
   
-  // Load goals when the page loads
-  document.addEventListener('DOMContentLoaded', function() {
-    loadGoals()
-    
-    // Add event listener for the Add Goal button
-    const addGoalBtn = document.getElementById('add-goal-btn')
-    if (addGoalBtn) {
-      addGoalBtn.addEventListener('click', async function() {
+  // Initialize goals board
+  function initializeGoalsBoard() {
+    // Store a reference to the controller for cleanup
+    window.goalsBoardController = {
+      initialize: function() {
+        console.log('Initializing goals board...')
+        this.cleanup(); // Clean up any existing listeners
+        this.setupEventListeners();
+        loadGoals();
+      },
+      
+      setupEventListeners: function() {
+        // Add event listener for the Add Goal button
+        this.addGoalBtn = document.getElementById('add-goal-btn')
+        if (this.addGoalBtn) {
+          this.boundHandleAddGoal = this.handleAddGoal.bind(this);
+          this.addGoalBtn.addEventListener('click', this.boundHandleAddGoal);
+        }
+      },
+      
+      handleAddGoal: async function() {
         console.log('Add Goal button clicked')
         const title = prompt('Enter goal title:')
         if (!title) return
@@ -649,89 +677,32 @@
           console.error('Error creating goal:', error)
           alert(`Error creating goal: ${error.message}`)
         }
-      })
-    }
-  })
-  
-  // Also load when Turbo finishes navigation (if using Turbo)
-  if (typeof Turbo !== 'undefined') {
-    document.addEventListener('turbo:load', function() {
-      loadGoals()
+      },
       
-      // Re-attach event listener for the Add Goal button after Turbo navigation
-      const addGoalBtn = document.getElementById('add-goal-btn')
-      if (addGoalBtn) {
-        addGoalBtn.addEventListener('click', async function() {
-          console.log('Add Goal button clicked')
-          const title = prompt('Enter goal title:')
-          if (!title) return
-
-          const description = prompt('Enter description (optional):') || ''
-          const categoryId = document.querySelector('[data-goals-board-category-id-value]')?.dataset?.goalsBoardCategoryIdValue
-          
-          if (!categoryId) {
-            console.error('No category ID found')
-            alert('Error: Could not determine category. Please refresh the page and try again.')
-            return
-          }
-          
-          console.log('Creating goal with:', { title, description, categoryId })
-          
-          try {
-            const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
-            if (!csrfToken) {
-              throw new Error('CSRF token not found')
-            }
-            
-            const response = await fetch(`/categories/${categoryId}/goals.json`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: JSON.stringify({
-                goal: {
-                  title: title,
-                  description: description,
-                  status: 'todo'
-                }
-              }),
-              credentials: 'same-origin'
-            })
-            
-            if (!response.ok) {
-              const error = await response.text()
-              console.error('Server error:', error)
-              throw new Error(error || 'Failed to create goal')
-            }
-            
-            const goal = await response.json()
-            console.log('Goal created:', goal)
-            
-            // Add the new goal to the top of the To Do list
-            const todoContainer = document.querySelector('[data-status="todo"] .goals-container')
-            if (todoContainer) {
-              console.log('Found todo container, adding goal')
-              const goalElement = createGoalElement(goal)
-              const firstChild = todoContainer.firstChild
-              if (firstChild) {
-                todoContainer.insertBefore(goalElement, firstChild)
-              } else {
-                todoContainer.appendChild(goalElement)
-              }
-            } else {
-              console.error('Could not find todo container, reloading page')
-              window.location.reload()
-            }
-            
-          } catch (error) {
-            console.error('Error creating goal:', error)
-            alert(`Error creating goal: ${error.message}`)
-          }
-        })
+      cleanup: function() {
+        console.log('Cleaning up goals board...')
+        // Remove event listeners
+        if (this.addGoalBtn && this.boundHandleAddGoal) {
+          this.addGoalBtn.removeEventListener('click', this.boundHandleAddGoal);
+          this.boundHandleAddGoal = null;
+        }
+        // Clean up drag and drop
+        const columns = document.querySelectorAll('.goal-column');
+        columns.forEach(column => {
+          column.replaceWith(column.cloneNode(true));
+        });
       }
-    })
+    };
+    
+    // Initialize on page load
+    window.goalsBoardController.initialize();
+  }
+  
+  // Initialize when the DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGoalsBoard);
+  } else {
+    initializeGoalsBoard();
   }
 </script>
 
