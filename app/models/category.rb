@@ -1,11 +1,12 @@
 class Category < ApplicationRecord
+  belongs_to :user
   has_many :subcategories, -> { order(position: :asc) }, dependent: :destroy
   
   # Set default score
   attribute :score, :decimal, default: 10.0
   
-  validates :name, presence: true, uniqueness: true
-  validates :position, presence: true, numericality: { only_integer: true }
+  validates :name, presence: true, uniqueness: { scope: :user_id }
+  validates :position, presence: true, numericality: { only_integer: true }, uniqueness: { scope: :user_id }
   
   # Score is calculated as the average of active subcategory scores
   def calculate_score

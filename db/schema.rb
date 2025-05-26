@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_26_185746) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_26_204443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,8 +21,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_185746) do
     t.bigint "position"
     t.timestamptz "created_at"
     t.timestamptz "updated_at"
-    t.index ["name"], name: "idx_16548_index_categories_on_name", unique: true
-    t.index ["position"], name: "idx_16548_index_categories_on_position", unique: true
+    t.bigint "user_id", default: 1, null: false
+    t.index ["user_id", "name"], name: "index_categories_on_user_id_and_name", unique: true
+    t.index ["user_id", "position"], name: "index_categories_on_user_id_and_position", unique: true
+    t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -43,9 +45,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_185746) do
     t.timestamptz "created_at"
     t.timestamptz "updated_at"
     t.boolean "active", default: true
+    t.bigint "user_id", default: 1, null: false
     t.index ["category_id", "name"], name: "idx_16556_index_subcategories_on_category_id_and_name", unique: true
     t.index ["category_id", "position"], name: "idx_16556_index_subcategories_on_category_id_and_position", unique: true
     t.index ["category_id"], name: "idx_16556_index_subcategories_on_category_id"
+    t.index ["user_id", "name"], name: "index_subcategories_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_subcategories_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -53,9 +58,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_185746) do
     t.text "password_digest"
     t.timestamptz "created_at"
     t.timestamptz "updated_at"
+    t.string "name"
     t.index ["email_address"], name: "idx_16534_index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "categories", "users"
   add_foreign_key "sessions", "users", name: "sessions_user_id_fkey"
   add_foreign_key "subcategories", "categories", name: "subcategories_category_id_fkey"
+  add_foreign_key "subcategories", "users"
 end

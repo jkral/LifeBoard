@@ -1,11 +1,12 @@
 class Subcategory < ApplicationRecord
   belongs_to :category, touch: true
+  belongs_to :user
   
   # Set default values
   attribute :active, :boolean, default: true
   attribute :score, :decimal, default: 10.0
   
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: { scope: [:category_id, :user_id] }
   validates :position, presence: true, numericality: { only_integer: true }
   validates :score, presence: true, numericality: { 
     greater_than_or_equal_to: 1.0, 

@@ -1,37 +1,13 @@
-class UsersController < ApplicationController
-  allow_unauthenticated_access only: %i[new create]
-  
-  def new
-    @user = User.new
-  end
-  
-  def create
-    @user = User.new(user_params)
+class ResetCategoriesForCurrentUser < ActiveRecord::Migration[8.0]
+  def up
+    # Find the first user
+    user = User.first
+    return unless user
     
-    begin
-      if @user.save
-        # Set up default categories and subcategories for the new user
-        setup_default_categories_for_user(@user)
-        
-        start_new_session_for(@user)
-        redirect_to root_path, notice: "Welcome to LifeBoard!"
-      else
-        render :new, status: :unprocessable_entity
-      end
-    rescue ActiveRecord::RecordNotUnique => e
-      @user.errors.add(:email_address, 'has already been taken')
-      render :new, status: :unprocessable_entity
-    end
-  end
-  
-  private
-  
-  def user_params
-    params.require(:user).permit(:email_address, :password, :password_confirmation, :name)
-  end
-  
-  def setup_default_categories_for_user(user)
-    # Define default categories and their subcategories
+    # Delete existing categories and subcategories for this user
+    user.categories.destroy_all
+    
+    # Create default categories
     default_categories = [
       {
         name: 'Health',
@@ -85,14 +61,19 @@ class UsersController < ApplicationController
       }
     ]
     
-    # Create categories and subcategories for the new user
-    default_categories.each do |category_attrs|
-      subcategories_attrs = category_attrs.delete(:subcategories)
-      category = user.categories.create!(category_attrs)
+    # Create categories and subcategories
+    default_categories.each do |cat_attrs|
+      subcategories = cat_attrs.delete(:subcategories)
+      category = user.categories.create!(cat_attrs)
       
-      subcategories_attrs.each do |subcategory_attrs|
-        category.subcategories.create!(subcategory_attrs.merge(user_id: user.id))
+      subcategories.each do |sub_attrs|
+        category.subcategories.create!(sub_attrs.merge(user_id: user.id))
       end
     end
+  end
+  
+  def down
+    # This migration cannot be reversed
+    raise ActiveRecord::IrreversibleMigration
   end
 end

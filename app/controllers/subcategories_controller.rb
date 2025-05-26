@@ -45,7 +45,9 @@ class SubcategoriesController < ApplicationController
   private
 
   def set_subcategory
-    @subcategory = Subcategory.find(params[:id])
+    @subcategory = current_user.subcategories.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to root_path, alert: 'Subcategory not found or access denied'
   end
 
   def subcategory_params
