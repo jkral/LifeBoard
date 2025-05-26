@@ -14,11 +14,18 @@ class SubcategoriesController < ApplicationController
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to category_path(@category), notice: 'Score updated successfully' }
+        format.json { render json: { 
+          success: true, 
+          subcategory_score: @subcategory.score, 
+          category_score: @category.score,
+          message: 'Score updated successfully' 
+        }}
       end
     else
       respond_to do |format|
         format.turbo_stream { render :error }
         format.html { redirect_to category_path(@subcategory.category), alert: 'Failed to update score' }
+        format.json { render json: { success: false, message: 'Failed to update score' }, status: :unprocessable_entity }
       end
     end
   end

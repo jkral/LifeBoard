@@ -8,16 +8,27 @@ export default class extends Controller {
 
   connect() {
     // Initialize any necessary state
+    console.log('Score slider controller connected', this.element)
+    console.log('Subcategory ID:', this.subcategoryIdValue)
   }
 
   updateScore(event) {
+    console.log('updateScore called', event.type)
     const score = event.target.value
     const subcategoryId = this.subcategoryIdValue
+    console.log('Score:', score, 'Subcategory ID:', subcategoryId)
     
     // Update the displayed score next to the slider
-    const scoreDisplay = this.element.nextElementSibling
-    if (scoreDisplay) {
-      scoreDisplay.textContent = score
+    // Find the score display in the new design structure
+    const parentItem = this.element.closest('.subcategory-item')
+    console.log('Parent item found:', !!parentItem)
+    if (parentItem) {
+      const scoreDisplay = parentItem.querySelector('.subcategory-header span')
+      console.log('Score display found:', !!scoreDisplay)
+      if (scoreDisplay) {
+        scoreDisplay.textContent = parseFloat(score).toFixed(1)
+        console.log('Updated display text to:', parseFloat(score).toFixed(1))
+      }
     }
     
     // Send the update to the server
@@ -25,8 +36,17 @@ export default class extends Controller {
   }
   
   async updateSubcategoryScore(subcategoryId, score) {
-    const url = `/categories/1/subcategories/${subcategoryId}` // Update with dynamic category ID if needed
+    console.log('updateSubcategoryScore called with:', subcategoryId, score)
+    // Get the category ID from the URL path
+    const pathParts = window.location.pathname.split('/')
+    console.log('Path parts:', pathParts)
+    const categoryId = pathParts[pathParts.indexOf('categories') + 1]
+    console.log('Category ID from URL:', categoryId)
+    
+    const url = `/categories/${categoryId}/subcategories/${subcategoryId}`
+    console.log('Request URL:', url)
     const token = document.querySelector('meta[name="csrf-token"]').content
+    console.log('CSRF token found:', !!token)
     
     try {
       const response = await fetch(url, {
@@ -34,7 +54,7 @@ export default class extends Controller {
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': token,
-          'Accept': 'text/vnd.turbo-stream.html, text/html, application/xhtml+xml',
+          'Accept': 'application/json',
           'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ 
@@ -44,11 +64,27 @@ export default class extends Controller {
         })
       })
       
+      console.log('Response status:', response.status, response.ok)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
       
-      // Handle the response, maybe update the UI or show a success message
+      // Handle the response and update the UI
+      console.log('Parsing response as JSON')
+      const responseData = await response.json()
+      console.log('Response data:', responseData)
+      
+      // Update the category score display
+      if (responseData.category_score) {
+        console.log('Category score from response:', responseData.category_score)
+        const scoreDisplay = document.querySelector('.score-display')
+        console.log('Score display element found:', !!scoreDisplay)
+        if (scoreDisplay) {
+          scoreDisplay.textContent = parseFloat(responseData.category_score).toFixed(1)
+          console.log('Updated category score display to:', parseFloat(responseData.category_score).toFixed(1))
+        }
+      }
+      
       console.log('Score updated successfully')
       
       // If using Turbo, you might want to handle the response
