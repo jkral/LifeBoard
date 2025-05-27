@@ -1,0 +1,15 @@
+<%= turbo_stream.prepend "category_#{@category.id}_subcategories" do %>
+  <%= render @subcategory %>
+<% end %>
+
+<%= turbo_stream.update "new_subcategory" do %>
+  <%= link_to '+ Add Subcategory', new_category_subcategory_path(@category), 
+      class: "block w-full text-center py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 hover:border-indigo-500 hover:text-indigo-700 transition-colors duration-200",
+      data: { turbo_frame: "new_subcategory" } %>
+<% end %>
+
+<%= turbo_stream.update "category_#{@category.id}_score" do %>
+  <%= render 'categories/score', category: @category %>
+<% end %>
+
+<%= turbo_stream.prepend "flash", partial: "shared/flash" %>

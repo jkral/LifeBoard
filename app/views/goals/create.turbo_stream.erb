@@ -1,0 +1,18 @@
+<%# Clear the form and any errors %>
+<%= turbo_stream.replace 'new_goal', partial: 'goals/form', locals: { goal: Goal.new, category: @category } %>
+
+<%# Add the new goal to the appropriate column %>
+<%= turbo_stream.prepend "#{@goal.status}_goals", partial: 'goals/goal', locals: { goal: @goal } %>
+
+<%# Update the flash message %>
+<%= turbo_stream.update 'flash', partial: 'shared/flash' %>
+
+<%# Focus the title field for the next goal %>
+<%= turbo_stream.invoke 'focus', selector: '#goal_title' %>
+
+<%# Update the counter for the status column %>
+<%= turbo_stream.update "#{@goal.status}_count" do %>
+  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_badge_classes(@goal.status) %>">
+    <%= @goal.user.goals.send(@goal.status).count %>
+  </span>
+<% end %>

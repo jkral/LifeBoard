@@ -1,0 +1,52 @@
+<div class="bg-white rounded-lg shadow-sm p-6 mb-6" 
+     data-controller="goals-board" 
+     data-goals-board-dashboard-value="<%= local_assigns[:dashboard] || false %>"
+     data-goals-board-category-id-value="<%= local_assigns[:category]&.id %>"
+     data-action="turbo:before-cache@document->goals-board#cleanup turbo:before-render@document->goals-board#cleanup">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-800"><%= local_assigns[:title] || 'Goals' %></h2>
+    <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors" 
+            data-action="click->goals-board#showAddGoalForm">
+      + Add Goal
+    </button>
+  </div>
+  
+  <div class="goals-board" data-goals-board-target="board">
+    <% ['todo', 'in_progress', 'done'].each do |status| %>
+      <div class="goal-column" data-status="<%= status %>">
+        <h3 class="text-sm font-medium text-gray-700 mb-3 pb-2 border-b border-gray-200">
+          <%= status.titleize %>
+        </h3>
+        <div class="space-y-3" data-goals-board-target="<%= status.underscore %>Container">
+          <% if local_assigns[:goals] && goals[status] %>
+            <% goals[status].each do |goal| %>
+              <%= render 'goals/goal_card', goal: goal %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div id="addGoalModal" class="modal" data-goals-board-target="addGoalModal">
+  <div class="modal-content">
+    <span class="close" data-action="click->goals-board#hideAddGoalForm">&times;</span>
+    <h3>Add New Goal</h3>
+    <form data-goals-board-target="addGoalForm">
+      <div class="form-group">
+        <label for="goal_title">Title</label>
+        <input type="text" id="goal_title" name="goal[title]" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="goal_description">Description (Optional)</label>
+        <textarea id="goal_description" name="goal[description]" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" data-action="click->goals-board#hideAddGoalForm">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Goal</button>
+      </div>
+    </form>
+  </div>
+</div>
