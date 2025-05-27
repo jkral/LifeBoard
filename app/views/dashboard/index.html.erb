@@ -1,14 +1,4 @@
 <div class="page-container">
-  <!-- Debug info (only show in development) -->
-  <% if Rails.env.development? %>
-    <div style="background: #f8f9fa; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px;">
-      <h3>Debug Info</h3>
-      <p>User ID: <%= current_user&.id %></p>
-      <p>Categories found: <%= @categories&.count || 0 %></p>
-      <p>Total Score: <%= @total_score %></p>
-    </div>
-  <% end %>
-  
   <!-- App header -->
   <div class="header">
     <div class="app-title" style="font-size: 3rem; font-weight: bold; line-height: 1.2;">LifeBoard</div>
