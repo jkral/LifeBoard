@@ -8,16 +8,19 @@ class Category < ApplicationRecord
   
   validates :name, presence: true, uniqueness: { scope: :user_id }
   validates :position, presence: true, numericality: { only_integer: true }, uniqueness: { scope: :user_id }
+  validates :score, presence: true, numericality: { 
+    greater_than_or_equal_to: 1.0, 
+    less_than_or_equal_to: 10.0,
+    message: 'must be between 1.0 and 10.0'
+  }
   
   # Score is calculated as the average of active subcategory scores
   def calculate_score
     active_subs = subcategories.active
-    return 0 if active_subs.empty?
+    return 10.0 if active_subs.empty? # Default to 10.0 if no active subcategories
     
     # Convert all scores to float to ensure consistent behavior
     scores = active_subs.pluck(:score).map(&:to_f)
-    total = scores.sum
-    count = scores.size
     
     # Special case: if all subcategories are 10.0 (or very close to it), return exactly 10.0
     if scores.all? { |score| score >= 9.95 }
@@ -25,7 +28,10 @@ class Category < ApplicationRecord
     end
     
     # Calculate average with proper rounding
+    total = scores.sum
+    count = scores.size
     average = total / count
+    
     # Round to 1 decimal place and ensure we don't get values like 9.9999999
     (average * 10).round.to_f / 10
   end
@@ -48,7 +54,7 @@ class Category < ApplicationRecord
   # Class method to get the total score (average of all category scores)
   def self.total_score
     active_categories = joins(:subcategories).where(subcategories: { active: true }).distinct
-    return 0 if active_categories.empty?
+    return 10.0 if active_categories.empty? # Default to 10.0 if no active categories
     
     # Special case: if all categories are 10.0, ensure the result is exactly 10.0
     if active_categories.all? { |cat| cat.score.to_f >= 9.95 }
@@ -56,7 +62,13 @@ class Category < ApplicationRecord
     end
     
     # Calculate with higher precision to avoid rounding errors
-    active_categories.average(:score).to_f.round(1)
+    scores = active_categories.pluck(:score).map(&:to_f)
+    total = scores.sum
+    count = scores.size
+    average = total / count
+    
+    # Round to 1 decimal place
+    (average * 10).round.to_f / 10
   end
   
   # Get only active subcategories

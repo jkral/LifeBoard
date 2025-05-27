@@ -1,7 +1,7 @@
 <div class="page-container">
   <!-- App header -->
   <div class="header">
-    <div class="app-title" style="font-size: 3rem; font-weight: bold; line-height: 1.2;">LifeBoard</div>
+    <div class="app-title">LifeBoard</div>
     <div class="subtitle">Life Balance Dashboard</div>
   </div>
   
@@ -17,31 +17,46 @@
     </div>
   </div>
   
-  <!-- Categories list -->
-  <div class="categories">
+  <!-- Categories grid -->
+  <div class="categories-grid">
     <% @categories.each do |category| %>
-      <% score = category.score || 0 %>
-      
-      <%= link_to category_path(category), class: "block" do %>
-        <div class="category-card">
-          <div class="category-info">
-            <h3><%= category.name %></h3>
-            <p><%= category.description %></p>
-          </div>
-          <div class="category-score">
-            <% if category.score.to_f >= 9.95 %>
-              10.0
-            <% else %>
-              <%= number_with_precision(category.score, precision: 1) %>
-            <% end %>
+      <div class="category-card">
+        <div class="category-header">
+          <h2><%= category.name %></h2>
+          <div class="score-display">
+            <%= render 'categories/score', category: category %>
           </div>
         </div>
-      <% end %>
+        
+        <div class="subcategories-list">
+          <% category.subcategories.active.each do |subcategory| %>
+            <div class="subcategory-item">
+              <div class="subcategory-header">
+                <span><%= subcategory.name %></span>
+                <span><%= number_with_precision(subcategory.score, precision: 1) %></span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <%= link_to category_path(category), class: "view-details-btn" do %>
+          View Details
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        <% end %>
+      </div>
     <% end %>
   </div>
 </div>
 
 <style>
+  .page-container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
   .header {
     text-align: center;
     margin-bottom: 30px;
@@ -49,9 +64,10 @@
   }
   
   .app-title {
-    font-size: 24px;
+    font-size: 3rem;
     font-weight: bold;
     margin-bottom: 8px;
+    color: white;
   }
   
   .subtitle {
@@ -84,23 +100,19 @@
     text-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
   
-  .categories {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
   }
   
   .category-card {
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     border-radius: 16px;
-    padding: 20px;
+    padding: 15px;
     border: 1px solid rgba(255,255,255,0.2);
-    cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
   
   .category-card:hover {
@@ -108,21 +120,58 @@
     transform: translateY(-2px);
   }
   
-  .category-info h3 {
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .category-header h2 {
     color: white;
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin: 0;
   }
   
-  .category-info p {
-    color: rgba(255,255,255,0.7);
-    font-size: 14px;
+  .subcategories-list {
+    margin-bottom: 15px;
   }
   
-  .category-score {
-    font-size: 28px;
-    font-weight: bold;
+  .subcategory-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .subcategory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .subcategory-header span:first-child {
+    color: rgba(255,255,255,0.8);
+  }
+  
+  .subcategory-header span:last-child {
     color: white;
+    font-weight: 500;
+  }
+  
+  .view-details-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .view-details-btn:hover {
+    background: rgba(255,255,255,0.2);
   }
 </style>

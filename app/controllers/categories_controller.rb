@@ -6,6 +6,20 @@ class CategoriesController < ApplicationController
     @subcategories = @category.subcategories.active.order(:position)
   end
   
+  def new
+    @category = current_user.categories.new
+  end
+  
+  def create
+    @category = current_user.categories.new(category_params)
+    
+    if @category.save
+      redirect_to category_path(@category), notice: 'Category was successfully created.'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+  
   # Update the category score directly
   def update
     if @category.update(category_params)
@@ -42,6 +56,6 @@ class CategoriesController < ApplicationController
   end
   
   def category_params
-    params.require(:category).permit(:score)
+    params.require(:category).permit(:name, :description, :position, :score)
   end
 end

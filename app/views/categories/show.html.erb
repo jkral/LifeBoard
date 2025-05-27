@@ -1,29 +1,24 @@
 <div class="page-container">
   <!-- Category Header -->
-  <div class="mb-4">
-    <div class="category-header items-center">
-      <%= link_to root_path, class: "back-btn mt-1" do %>
+  <div class="mb-4 w-full text-center relative">
+    <div class="category-header">
+      <%= link_to root_path, class: "back-btn" do %>
         ← Back
       <% end %>
-      <div></div> <!-- Spacer for flex alignment -->
+      <h1 class="app-title text-center" style="font-size: 3rem; font-weight: bold; line-height: 1.2; color: white;"><%= @category.name %></h1>
+      <div class="w-16"></div> <!-- Spacer for flex alignment -->
     </div>
-    <h1 class="app-title text-center mt-4" style="font-size: 3rem; font-weight: bold; line-height: 1.2; color: white;"><%= @category.name %></h1>
   </div>
   
   <!-- Category Score -->
   <div class="score-editor">
     <h3>Current <%= @category.name %> Score</h3>
-    <div class="score-display">
-      <% if @category.score.to_f >= 9.95 %>
-        10.0
-      <% else %>
-        <%= number_with_precision(@category.score, precision: 1) %>
-      <% end %>
-    </div>
+    <%= render "categories/score", category: @category %>
     
     <!-- Subcategory Scores -->
     <div class="subcategories">
       <% @subcategories.each do |subcategory| %>
+        <%= turbo_stream_from subcategory %>
         <div class="subcategory-item">
           <div class="subcategory-header">
             <h4><%= subcategory.name %></h4>
@@ -132,6 +127,8 @@
     </div>
   </div>
 </div>
+
+<%= turbo_stream_from @category %>
 
 <script>
   // This will be managed by the Stimulus controller
@@ -763,6 +760,20 @@
       }
     });
   });
+
+  // Ensure page scrolls to top on load
+  document.addEventListener('turbo:load', function() {
+    window.scrollTo(0, 0);
+  });
+  
+  // Also handle regular page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      window.scrollTo(0, 0);
+    });
+  } else {
+    window.scrollTo(0, 0);
+  }
 </script>
 
 <style>
@@ -787,13 +798,23 @@
   }
   
   .goal-column {
-    transition: all 0.2s ease;
-    position: relative;
+    border: 1.5px solid rgba(255,255,255,0.22);
+    box-shadow: 0 2px 8px rgba(80, 80, 120, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    height: 70vh;
+    overflow-y: auto;
   }
   
   .goal-column.drag-over {
-    background: rgba(99, 102, 241, 0.03);
-    transition: background 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
   .goal-column.drag-over .column-title {
@@ -822,17 +843,23 @@
   }
   
   /* Category Page Styles */
+  .page-container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+  }
+  
   .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
     color: white;
+    position: relative;
   }
   
   .back-btn {
-    position: relative;
-    top: 4.5rem; /* Positioned even lower */
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
@@ -841,16 +868,15 @@
     cursor: pointer;
     text-decoration: none;
     margin-bottom: 1rem;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
   
-  .category-title {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .page-container {
-    padding-top: 0;
-    margin-top: -4.25rem; /* Pull content up a bit more */
+  .app-title {
+    flex: 1;
+    text-align: center;
+    margin: 0;
   }
   
   .score-editor {
@@ -883,6 +909,7 @@
   }
   
   .subcategory-item {
+    border: none;
     background: rgba(255,255,255,0.1);
     border-radius: 12px;
     padding: 15px;
@@ -987,26 +1014,6 @@
       grid-template-columns: 1fr;
       gap: 16px;
     }
-  }
-  
-  .goal-column {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 180px;
-    width: 180px;
-    max-width: 100%;
-    height: 70vh;
-    overflow-y: auto;
-    flex-shrink: 0;
-  }
-  
-  .goal-column.drag-over {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
   .column-header {

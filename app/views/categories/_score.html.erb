@@ -1,0 +1,7 @@
+<div class="score-display">
+  <% if category.score.to_f >= 9.95 %>
+    10.0
+  <% else %>
+    <%= number_with_precision(category.score, precision: 1) %>
+  <% end %>
+</div> 

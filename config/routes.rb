@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   root to: 'dashboard#index'
   
   # Categories
-  resources :categories, only: [:show, :update] do
+  resources :categories, only: [:show, :update, :new, :create] do
     resources :subcategories, only: [:show, :update]
     resources :goals, only: [:index, :create, :update, :destroy] do
       post 'move', on: :member
