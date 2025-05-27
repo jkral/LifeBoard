@@ -11,10 +11,8 @@ class SessionsController < ApplicationController
       session = start_new_session_for(user)
       if session.persisted?
         Rails.logger.info "Session created: #{session.id}, cookie set: #{cookies.signed[:session_id].present?}"
-        
         # Redirect to the stored location or the default after authentication URL
-        redirect_to stored_location_for(:user) || after_authentication_url,
-                    notice: "Signed in successfully."
+        redirect_to stored_location_for(:user) || after_authentication_url
       else
         Rails.logger.error "Failed to create session: #{session.errors.full_messages}"
         redirect_to new_session_path, alert: "Failed to create session. Please try again."

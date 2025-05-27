@@ -89,13 +89,14 @@ export default class extends Controller {
       
       if (response.ok) {
         this.loadGoals()
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Goal added successfully!', type: 'success' } }))
       } else {
         const error = await response.text()
-        alert(`Error: ${error}`)
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: `Error: ${error}`, type: 'error' } }))
       }
     } catch (error) {
       console.error('Error creating goal:', error)
-      alert('Failed to create goal')
+      window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Failed to create goal', type: 'error' } }))
     }
   }
 
@@ -128,13 +129,14 @@ export default class extends Controller {
       
       if (response.ok) {
         this.loadGoals()
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Goal updated successfully!', type: 'success' } }))
       } else {
         const error = await response.text()
-        alert(`Error: ${error}`)
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: `Error: ${error}`, type: 'error' } }))
       }
     } catch (error) {
       console.error('Error updating goal:', error)
-      alert('Failed to update goal')
+      window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Failed to update goal', type: 'error' } }))
     }
   }
 
@@ -155,13 +157,14 @@ export default class extends Controller {
       
       if (response.ok) {
         goalCard.remove()
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Goal deleted successfully!', type: 'success' } }))
       } else {
         const error = await response.text()
-        alert(`Error: ${error}`)
+        window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: `Error: ${error}`, type: 'error' } }))
       }
     } catch (error) {
       console.error('Error deleting goal:', error)
-      alert('Failed to delete goal')
+      window.dispatchEvent(new CustomEvent('flash:show', { detail: { message: 'Failed to delete goal', type: 'error' } }))
     }
   }
 

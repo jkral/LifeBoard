@@ -22,10 +22,16 @@ class GoalsController < ApplicationController
     @goal.user = current_user
     @goal.status = params[:status] || 'todo'
 
-    if @goal.save
-      render json: @goal, status: :created
-    else
-      render json: { errors: @goal.errors.full_messages }, status: :unprocessable_entity
+    respond_to do |format|
+      if @goal.save
+        format.html { redirect_to category_path(@category) }
+        format.turbo_stream { }
+        format.json { render json: @goal, status: :created }
+      else
+        format.html { render 'categories/show', status: :unprocessable_entity }
+        format.turbo_stream { flash.now[:alert] = @goal.errors.full_messages.to_sentence }
+        format.json { render json: { errors: @goal.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 

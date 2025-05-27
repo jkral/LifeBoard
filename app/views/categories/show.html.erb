@@ -79,7 +79,7 @@
        data-action="turbo:before-cache@document->goals-board#cleanup turbo:before-render@document->goals-board#cleanup">
     <div class="goals-header">
       <h2>Goals</h2>
-      <button id="add-goal-btn" class="add-goal-btn">+ Add Goal</button>
+      <button id="add-goal-btn" class="add-goal-btn" type="button">+ Add Goal</button>
     </div>
     
     <div class="goals-board" data-goals-board-category-id-value="<%= @category.id %>">
@@ -112,6 +112,23 @@
           <!-- Goals will be loaded here by JavaScript -->
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Goal Modal (now outside .page-container for proper overlay) -->
+<div id="add-goal-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Add a Goal</h3>
+      <button type="button" class="modal-close" id="close-add-goal-modal" aria-label="Close">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <%= render 'goals/form', goal: Goal.new, category: @category %>
     </div>
   </div>
 </div>
@@ -378,61 +395,70 @@
       .replace(/'/g, "&#039;")
   }
   
-  // Function to add a new goal (defined in the event listener below)
-  
   // Function to edit a goal
   window.editGoal = async function(goalId) {
     const goalElement = document.querySelector(`[data-goal-id="${goalId}"]`)
     if (!goalElement) return
-    
+
+    // Get current values
     const title = goalElement.querySelector('.goal-title').textContent
     const descElement = goalElement.querySelector('.goal-desc')
     const currentDesc = descElement ? descElement.textContent : ''
-    
-    const newTitle = prompt('Edit goal title:', title)
-    if (newTitle === null) return // User cancelled
-    
-    const newDesc = prompt('Edit description (optional):', currentDesc) || ''
-    
-    const categoryId = document.querySelector('[data-goals-board-category-id-value]').dataset.goalsBoardCategoryIdValue
-    
-    try {
-      const response = await fetch(`/categories/${categoryId}/goals/${goalId}.json`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector("meta[name='csrf-token']").content
-        },
-        body: JSON.stringify({
-          goal: {
-            title: newTitle,
-            description: newDesc
-          }
-        })
-      })
-      
-      if (!response.ok) throw new Error('Failed to update goal')
-      
-      // Update the UI
-      goalElement.querySelector('.goal-title').textContent = newTitle
-      if (newDesc) {
-        if (descElement) {
-          descElement.textContent = newDesc
-        } else {
-          const titleElement = goalElement.querySelector('.goal-title')
-          const descElement = document.createElement('div')
-          descElement.className = 'goal-desc'
-          descElement.textContent = newDesc
-          titleElement.after(descElement)
-        }
-      } else if (descElement) {
-        descElement.remove()
+
+    // Open the modal
+    const addGoalModal = document.getElementById('add-goal-modal')
+    addGoalModal.classList.remove('hidden')
+
+    // Fill the form fields
+    const titleInput = addGoalModal.querySelector('input[name="goal[title]"]')
+    const descInput = addGoalModal.querySelector('textarea[name="goal[description]"]')
+    const statusInput = addGoalModal.querySelector('[name="goal[status]"]')
+    if (titleInput) titleInput.value = title
+    if (descInput) descInput.value = currentDesc
+    if (statusInput) {
+      // Try to get the status from the goal element's data-status or a class/attribute
+      let currentStatus = goalElement.closest('.goal-column')?.dataset.status
+      if (!currentStatus) {
+        // fallback: try to get from a data-status attribute on the card
+        currentStatus = goalElement.dataset.status
       }
-      
-    } catch (error) {
-      console.error('Error updating goal:', error)
-      alert('Failed to update goal. Please check the console for details.')
+      if (currentStatus) statusInput.value = currentStatus
     }
+
+    // Set form action/method for PATCH
+    const form = addGoalModal.querySelector('form')
+    const categoryId = document.querySelector('[data-goals-board-category-id-value]')?.dataset?.goalsBoardCategoryIdValue
+    form.action = `/categories/${categoryId}/goals/${goalId}`
+    form.method = 'post'
+    // Add hidden _method input for PATCH
+    let methodInput = form.querySelector('input[name="_method"]')
+    if (!methodInput) {
+      methodInput = document.createElement('input')
+      methodInput.type = 'hidden'
+      methodInput.name = '_method'
+      form.appendChild(methodInput)
+    }
+    methodInput.value = 'patch'
+
+    // Ensure authenticity_token is present and correct
+    let tokenInput = form.querySelector('input[name="authenticity_token"]')
+    const pageToken = document.querySelector('meta[name="csrf-token"]')?.content
+    if (!tokenInput && pageToken) {
+      tokenInput = document.createElement('input')
+      tokenInput.type = 'hidden'
+      tokenInput.name = 'authenticity_token'
+      tokenInput.value = pageToken
+      form.appendChild(tokenInput)
+    } else if (tokenInput && pageToken) {
+      tokenInput.value = pageToken
+    }
+
+    // Change submit button text to 'Update Goal'
+    const submitBtn = form.querySelector('input[type="submit"]')
+    if (submitBtn) submitBtn.value = 'Update Goal'
+
+    // Mark modal as edit mode
+    addGoalModal.setAttribute('data-editing', 'true')
   }
   
   // Function to delete a goal
@@ -604,87 +630,16 @@
         // Add event listener for the Add Goal button
         this.addGoalBtn = document.getElementById('add-goal-btn')
         if (this.addGoalBtn) {
-          this.boundHandleAddGoal = this.handleAddGoal.bind(this);
-          this.addGoalBtn.addEventListener('click', this.boundHandleAddGoal);
-        }
-      },
-      
-      handleAddGoal: async function() {
-        console.log('Add Goal button clicked')
-        const title = prompt('Enter goal title:')
-        if (!title) return
-
-        const description = prompt('Enter description (optional):') || ''
-        const categoryId = document.querySelector('[data-goals-board-category-id-value]')?.dataset?.goalsBoardCategoryIdValue
-        
-        if (!categoryId) {
-          console.error('No category ID found')
-          alert('Error: Could not determine category. Please refresh the page and try again.')
-          return
-        }
-        
-        console.log('Creating goal with:', { title, description, categoryId })
-        
-        try {
-          const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
-          if (!csrfToken) {
-            throw new Error('CSRF token not found')
-          }
-          
-          const response = await fetch(`/categories/${categoryId}/goals.json`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-Token': csrfToken,
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-              goal: {
-                title: title,
-                description: description,
-                status: 'todo'
-              }
-            }),
-            credentials: 'same-origin'
-          })
-          
-          if (!response.ok) {
-            const error = await response.text()
-            console.error('Server error:', error)
-            throw new Error(error || 'Failed to create goal')
-          }
-          
-          const goal = await response.json()
-          console.log('Goal created:', goal)
-          
-          // Add the new goal to the top of the To Do list
-          const todoContainer = document.querySelector('[data-status="todo"] .goals-container')
-          if (todoContainer) {
-            console.log('Found todo container, adding goal')
-            const goalElement = createGoalElement(goal)
-            const firstChild = todoContainer.firstChild
-            if (firstChild) {
-              todoContainer.insertBefore(goalElement, firstChild)
-            } else {
-              todoContainer.appendChild(goalElement)
-            }
-          } else {
-            console.error('Could not find todo container, reloading page')
-            window.location.reload()
-          }
-          
-        } catch (error) {
-          console.error('Error creating goal:', error)
-          alert(`Error creating goal: ${error.message}`)
+          // No longer attach the old handleAddGoal; modal logic is handled separately
         }
       },
       
       cleanup: function() {
         console.log('Cleaning up goals board...')
         // Remove event listeners
-        if (this.addGoalBtn && this.boundHandleAddGoal) {
-          this.addGoalBtn.removeEventListener('click', this.boundHandleAddGoal);
-          this.boundHandleAddGoal = null;
+        if (this.addGoalBtn) {
+          // Remove event listeners for the Add Goal button
+          this.addGoalBtn.removeEventListener('click');
         }
         // Clean up drag and drop
         const columns = document.querySelectorAll('.goal-column');
@@ -704,6 +659,110 @@
   } else {
     initializeGoalsBoard();
   }
+
+  // Modal open/close logic for Add Goal
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Add Goal Modal] Modal JS loaded');
+    const addGoalBtn = document.getElementById('add-goal-btn');
+    const addGoalModal = document.getElementById('add-goal-modal');
+    const closeModalBtn = document.getElementById('close-add-goal-modal');
+    const cancelBtn = document.querySelector('#add-goal-modal .goal-form-button-row button[type="button"]');
+    if (addGoalBtn && addGoalModal) {
+      addGoalBtn.addEventListener('click', function() {
+        console.log('[Add Goal Modal] Add Goal button clicked');
+        addGoalModal.classList.remove('hidden');
+      });
+      addGoalModal.addEventListener('click', function(e) {
+        if (e.target === addGoalModal) {
+          addGoalModal.classList.add('hidden');
+        }
+      });
+    }
+    if (closeModalBtn && addGoalModal) {
+      closeModalBtn.addEventListener('click', function() {
+        addGoalModal.classList.add('hidden');
+        clearGoalForm();
+      });
+    }
+    if (cancelBtn && addGoalModal) {
+      cancelBtn.addEventListener('click', function() {
+        addGoalModal.classList.add('hidden');
+        clearGoalForm();
+      });
+    }
+  });
+
+  function clearGoalForm() {
+    const modal = document.getElementById('add-goal-modal');
+    if (!modal) return;
+    const titleInput = modal.querySelector('input[name="goal[title]"]');
+    const descInput = modal.querySelector('textarea[name="goal[description]"]');
+    if (titleInput) titleInput.value = '';
+    if (descInput) descInput.value = '';
+    // Reset form action/method to Add
+    const form = modal.querySelector('form')
+    const categoryId = document.querySelector('[data-goals-board-category-id-value]')?.dataset?.goalsBoardCategoryIdValue
+    form.action = `/categories/${categoryId}/goals`
+    form.method = 'post'
+    // Remove only _method input if present, but never remove authenticity_token
+    const methodInput = form.querySelector('input[name="_method"]')
+    if (methodInput) methodInput.remove()
+    // Reset submit button text
+    const submitBtn = form.querySelector('input[type="submit"]')
+    if (submitBtn) submitBtn.value = 'Add Goal'
+    // Remove edit mode marker
+    modal.removeAttribute('data-editing')
+    // Double-check authenticity_token is present
+    let tokenInput = form.querySelector('input[name="authenticity_token"]')
+    if (!tokenInput) {
+      // Try to find it elsewhere in the DOM and append if missing
+      const pageToken = document.querySelector('meta[name="csrf-token"]')?.content
+      if (pageToken) {
+        tokenInput = document.createElement('input')
+        tokenInput.type = 'hidden'
+        tokenInput.name = 'authenticity_token'
+        tokenInput.value = pageToken
+        form.appendChild(tokenInput)
+      }
+    }
+  }
+
+  // Intercept modal form submission for add/edit goal
+  document.addEventListener('DOMContentLoaded', function() {
+    const addGoalModal = document.getElementById('add-goal-modal');
+    if (!addGoalModal) return;
+    const form = addGoalModal.querySelector('form');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const action = form.action;
+      const method = form.querySelector('input[name="_method"]')?.value?.toUpperCase() || form.method.toUpperCase();
+      try {
+        const response = await fetch(action, {
+          method: method === 'PATCH' ? 'PATCH' : 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: formData,
+          credentials: 'same-origin'
+        });
+        if (!response.ok) {
+          const error = await response.text();
+          alert('Failed to save goal: ' + error);
+          return;
+        }
+        // Success: close modal, clear form, reload goals
+        addGoalModal.classList.add('hidden');
+        clearGoalForm();
+        if (window.loadGoals) window.loadGoals();
+      } catch (error) {
+        alert('Failed to save goal: ' + error);
+      }
+    });
+  });
 </script>
 
 <style>
@@ -1177,6 +1236,97 @@
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  
+  /* Fallback to ensure modal is hidden by default */
+  #add-goal-modal.hidden, .modal-overlay.hidden {
+    display: none !important;
+  }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    transition: background 0.2s;
+  }
+  .modal-content {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 420px;
+    padding: 0;
+    position: relative;
+    animation: modalIn 0.18s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(32px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 0.5rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #f8fafc;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #3730a3;
+    margin: 0;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: #a1a1aa;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  .modal-body {
+    padding: 1.5rem;
+    min-height: 120px;
+    /* Ensure content is not clipped */
+    overflow: visible;
+  }
+  /* Ensure button row is always visible and stacked on mobile */
+  .goal-form-button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 600px) {
+    .modal-content {
+      max-width: 98vw;
+      min-width: 0;
+      border-radius: 0.75rem;
+    }
+    .modal-header, .modal-body {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .goal-form-button-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
 </style>
 
 <script>
@@ -1418,7 +1568,7 @@
       
       // Call the debounced update function
       console.log('Calling debounced update...');
-      debouncedUpdateSubcategoryScore(slider);
+      debouncedUpdateSubcategoryScore.flush();
       
       // Add a visual indicator that the update is in progress
       const parentItem = slider.closest('.subcategory-item');
