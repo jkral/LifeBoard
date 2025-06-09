@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let goals = JSON.parse(localStorage.getItem('lifeBoardGoals')) || [];
     let currentEditId = null; // null for adding, stores ID for editing
-    let draggedItem = null;   // For drag and drop functionality
 
     // =========================================================================
     // DOM ELEMENT REFERENCES
@@ -175,12 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
             goalCard.dataset.id = goal.id;
 
             goalCard.innerHTML = `
-                <span>${goal.text}</span>
-                <div class="actions">
-                    <button class="edit-goal-btn" aria-label="Edit Goal"><i class="fas fa-pencil-alt"></i></button>
-                    <button class="delete-goal-btn" aria-label="Delete Goal"><i class="fas fa-trash"></i></button>
-                </div>
-            `;
+            <i class="fas fa-hand-paper drag-handle" aria-label="Drag to reorder"></i>
+            <span class="goal-text">${goal.text}</span>
+            <div class="actions">
+                <button class="edit-goal-btn" aria-label="Edit Goal"><i class="fas fa-pencil-alt"></i></button>
+                <button class="delete-goal-btn" aria-label="Delete Goal"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
 
             // Place card in the correct column
             if (goal.status === 'inprogress') {
@@ -191,11 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 todoCardsContainer.appendChild(goalCard);
             }
         });
-
-        // Re-attach drag listeners to all cards, including new ones
-        addDragAndDropListeners();
     };
-
 
     // =========================================================================
     // GOAL MODAL HANDLING
@@ -285,60 +281,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
+    const initializeSortableLists = () => {
+        const cardContainers = document.querySelectorAll('.goal-cards');
     
-    // --- Drag and Drop ---
+        cardContainers.forEach(container => {
+            new Sortable(container, {
+                group: 'goals',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
     
-    const getDragAfterElement = (container, y) => {
-        const draggableElements = [...container.querySelectorAll('.goal-card:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
-        }, { offset: -Infinity }).element;
-    };
-
-    const addDragAndDropListeners = () => {
-        const cards = document.querySelectorAll('.goal-card');
-        const columns = document.querySelectorAll('.kanban-column');
-
-        cards.forEach(card => {
-            card.addEventListener('dragstart', () => {
-                draggedItem = card;
-                setTimeout(() => card.classList.add('dragging'), 0);
-            });
-
-            card.addEventListener('dragend', () => {
-                draggedItem.classList.remove('dragging');
-                draggedItem = null;
-            });
-        });
-
-        columns.forEach(column => {
-            column.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const cardContainer = column.querySelector('.goal-cards');
-                const afterElement = getDragAfterElement(cardContainer, e.clientY);
-                if (draggedItem) {
-                    if (afterElement == null) {
-                        cardContainer.appendChild(draggedItem);
-                    } else {
-                        cardContainer.insertBefore(draggedItem, afterElement);
-                    }
-                }
-            });
-
-            column.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if (draggedItem) {
-                    const newStatus = column.id; // e.g., 'todo', 'inprogress', 'done'
-                    const goalId = draggedItem.dataset.id;
+                // --- THIS IS THE KEY ---
+                // Tell SortableJS that only elements with the class '.drag-handle'
+                // can be used to initiate a drag.
+                handle: '.drag-handle',
+    
+                // We no longer need the delay options because the handle provides
+                // explicit intent. This improves the user experience.
+    
+                onAdd: function (evt) {
+                    const card = evt.item;
+                    const newContainer = evt.to;
+                    const goalId = card.dataset.id;
+                    const newStatus = newContainer.id.replace('-cards', '');
                     updateGoalStatus(goalId, newStatus);
-                    // No need to re-render, the DOM move is enough. The data is updated for persistence.
                 }
             });
         });
@@ -352,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCategories();
         renderGoals();
         setupEventListeners();
+        initializeSortableLists(); 
     };
 
     // Run the application

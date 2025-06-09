@@ -325,6 +325,10 @@ main {
     align-items: center;
     cursor: grab;
     transition: box-shadow 0.2s;
+    touch-action: none;
+    display: flex;
+    align-items: center; /* This is important */
+    gap: 10px; 
 }
 
 .goal-card:active {
@@ -350,6 +354,37 @@ main {
 
 .goal-card .actions button:hover {
     color: var(--clr-primary);
+}
+
+.goal-cards {
+    /* This is the key: give the drop area a minimum height */
+    min-height: 100px;
+    
+    /* Optional but recommended: provides a subtle visual cue for empty columns */
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.goal-text {
+    flex-grow: 1; /* Makes the text take up available space */
+}
+
+/* Style the new drag handle */
+.drag-handle {
+    font-size: 1.3em; /* Slightly smaller size might look better for the hand */
+    color: #b0b0b0;
+    cursor: grab;
+    padding: 10px 8px; /* Adjust padding for the new shape */
+    transition: color 0.2s; /* Add a smooth transition */
+}
+
+/* Add a hover effect for better feedback on desktop */
+.drag-handle:hover {
+    color: var(--clr-primary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 
@@ -479,6 +514,11 @@ main {
 
     .kanban-column {
         flex: 1;
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+        background-color: #cce5ff;
     }
 }
 
