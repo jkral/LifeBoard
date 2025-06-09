@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBoard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>LifeBoard</h1>
+        <div class="total-score-container">
+            <h2>Total Score: <span id="total-score">0</span></h2>
+        </div>
+    </header>
+
+    <main>
+        <section id="categories">
+            <!-- Health Category -->
+            <div class="category" id="health">
+                <div class="category-header">
+                    <h3>Health</h3>
+                    <span class="category-score" id="health-score">0</span>
+                    <input type="checkbox" id="health-active" checked>
+                    <!-- <label for="health-active">Active</label> -->
+                </div>
+                <div class="subcategories">
+                    <div class="subcategory">
+                        <label for="mental-slider">Mental: <span id="mental-value">5</span></label>
+                        <input type="range" id="mental-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="physical-slider">Physical: <span id="physical-value">5</span></label>
+                        <input type="range" id="physical-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="spiritual-slider">Spiritual: <span id="spiritual-value">5</span></label>
+                        <input type="range" id="spiritual-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Category -->
+            <div class="category" id="personal">
+                <div class="category-header">
+                    <h3>Personal</h3>
+                    <span class="category-score" id="personal-score">0</span>
+                    <input type="checkbox" id="personal-active" checked>
+                    <!-- <label for="personal-active">Active</label> -->
+                </div>
+                <div class="subcategories">
+                    <div class="subcategory">
+                        <label for="partner-slider">Partner: <span id="partner-value">5</span></label>
+                        <input type="range" id="partner-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="family-slider">Family: <span id="family-value">5</span></label>
+                        <input type="range" id="family-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="social-slider">Social: <span id="social-value">5</span></label>
+                        <input type="range" id="social-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Category -->
+            <div class="category" id="professional">
+                <div class="category-header">
+                    <h3>Professional</h3>
+                    <span class="category-score" id="professional-score">0</span>
+                    <input type="checkbox" id="professional-active" checked>
+                    <!-- <label for="professional-active">Active</label> -->
+                </div>
+                <div class="subcategories">
+                    <div class="subcategory">
+                        <label for="work-slider">Work: <span id="work-value">5</span></label>
+                        <input type="range" id="work-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="growth-slider">Growth: <span id="growth-value">5</span></label>
+                        <input type="range" id="growth-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="subcategory">
+                        <label for="passion-slider">Passion: <span id="passion-value">5</span></label>
+                        <input type="range" id="passion-slider" min="0" max="10" value="5" step="0.5">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="goals">
+            <div class="goals-header">
+                <h2>Goals</h2>
+                <button id="add-goal-btn">Add Goal</button>
+            </div>
+            <div class="kanban-board">
+                <div class="kanban-column" id="todo-column">
+                    <h3>To Do</h3>
+                    <div class="goal-cards" id="todo-cards"></div>
+                </div>
+                <div class="kanban-column" id="inprogress-column">
+                    <h3>In Progress</h3>
+                    <div class="goal-cards" id="inprogress-cards"></div>
+                </div>
+                <div class="kanban-column" id="done-column">
+                    <h3>Done</h3>
+                    <div class="goal-cards" id="done-cards"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Goal Modal -->
+    <div id="goal-modal" class="modal">
+        <div class="modal-content">
+            <!-- <span class="close">&times;</span> -->
+            <span class="close-btn">&times;</span>
+            <h3 id="modal-title">Add New Goal</h3>            
+            <input type="text" id="goal-text">
+            <button id="save-goal-btn">Save</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
