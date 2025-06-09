@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
             goalCard.dataset.id = goal.id;
 
             goalCard.innerHTML = `
-            <i class="fas fa-hand-paper drag-handle" aria-label="Drag to reorder"></i>
+            <img src="hand-grab.png" class="drag-handle" alt="Drag to reorder">
             <span class="goal-text">${goal.text}</span>
             <div class="actions">
                 <button class="edit-goal-btn" aria-label="Edit Goal"><i class="fas fa-pencil-alt"></i></button>

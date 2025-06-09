@@ -371,16 +371,18 @@ main {
 
 /* Style the new drag handle */
 .drag-handle {
-    font-size: 1.3em; /* Slightly smaller size might look better for the hand */
-    color: #b0b0b0;
+    /* Set an explicit size for the image */
+    width: 24px;
+    height: 24px;
+
+    /* These are still important for user experience */
     cursor: grab;
-    padding: 10px 8px; /* Adjust padding for the new shape */
-    transition: color 0.2s; /* Add a smooth transition */
+    opacity: 0.6; /* Makes it slightly less prominent than text */
+    transition: opacity 0.2s;
 }
 
-/* Add a hover effect for better feedback on desktop */
 .drag-handle:hover {
-    color: var(--clr-primary);
+    opacity: 1; /* Make it fully visible on hover */
 }
 
 .drag-handle:active {
