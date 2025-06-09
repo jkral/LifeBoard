@@ -196,7 +196,7 @@ main {
 .subcategory {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: 28px; /* CHANGED: Increased the gap for more breathing room */
 }
 
 .subcategory label {
